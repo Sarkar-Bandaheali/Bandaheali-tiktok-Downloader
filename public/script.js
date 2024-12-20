@@ -1,62 +1,81 @@
-document.getElementById('fetchBtn').addEventListener('click', async () => {
-  const videoUrl = document.getElementById('videoUrl').value;
-  const videoDetailsContainer = document.getElementById('videoDetails');
-  const downloadButtonsContainer = document.getElementById('downloadButtons');
+// Select the form and button elements
+const form = document.getElementById('videoForm');
+const urlInput = document.getElementById('videoUrl');
+const downloadButton = document.getElementById('downloadButton');
+const downloadLinksDiv = document.getElementById('downloadLinks');
 
-  if (!videoUrl.trim()) {
-    alert('Please paste a valid TikTok video URL!');
+// Event listener for the form submission
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();  // Prevent the default form submission
+
+  const videoUrl = urlInput.value.trim();  // Get the input URL
+
+  if (!videoUrl) {
+    alert("Please enter a TikTok video URL.");
     return;
   }
 
-  try {
-    // Fetch video details from the backend
-    const response = await fetch(`/api/tiktok?url=${encodeURIComponent(videoUrl)}`);
-    const data = await response.json();
+  downloadButton.textContent = "Fetching video details...";  // Update button text
 
-    if (!data.result) {
-      alert('Failed to fetch video details. Please check the URL or try again later.');
+  try {
+    // Make a request to the backend API with the TikTok video URL
+    const response = await fetch(`/api/tiktok?url=${encodeURIComponent(videoUrl)}`);
+
+    // Check if the request was successful
+    if (!response.ok) {
+      alert("An error occurred. Please try again later.");
+      downloadButton.textContent = "Fetch Video Details";
       return;
     }
 
-    // Populate video details
-    document.getElementById('coverImage').src = data.result.cover;
-    document.getElementById('videoTitle').innerText = `Title: ${data.result.title}`;
-    document.getElementById('authorName').innerText = `Author: ${data.result.author}`;
-    document.getElementById('stats').innerText = `Duration: ${data.result.duration}s | Views: ${data.result.views}`;
+    // Parse the JSON response
+    const data = await response.json();
 
-    // Generate download buttons
-    downloadButtonsContainer.innerHTML = ''; // Clear previous buttons
+    // Check if data was successfully returned
+    if (!data.status) {
+      alert("Failed to fetch video details.");
+      downloadButton.textContent = "Fetch Video Details";
+      return;
+    }
 
-    // Button for HD Video Download
-    const hdButton = document.createElement('button');
-    hdButton.innerText = 'Download HD Video';
-    hdButton.addEventListener('click', () => downloadFile(data.result.hdVideo, 'hd_video.mp4'));
-    downloadButtonsContainer.appendChild(hdButton);
+    // Update the UI with the fetched video details
+    displayDownloadLinks(data.result);
 
-    // Button for Watermarked Video Download
-    const wmButton = document.createElement('button');
-    wmButton.innerText = 'Download Watermarked Video';
-    wmButton.addEventListener('click', () => downloadFile(data.result.wmVideo, 'wm_video.mp4'));
-    downloadButtonsContainer.appendChild(wmButton);
-
-    // Button for Audio Download
-    const audioButton = document.createElement('button');
-    audioButton.innerText = 'Download Audio';
-    audioButton.addEventListener('click', () => downloadFile(data.result.sound, 'audio.mp3'));
-    downloadButtonsContainer.appendChild(audioButton);
-
-    // Show video details
-    videoDetailsContainer.classList.remove('hidden');
   } catch (error) {
-    console.error('Error fetching video details:', error);
-    alert('An error occurred. Please try again later.');
+    console.error("Error:", error);
+    alert("An error occurred while fetching the video.");
+  } finally {
+    downloadButton.textContent = "Fetch Video Details";  // Reset button text
   }
 });
 
-// Function to trigger file download
-function downloadFile(url, filename) {
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-      }
+// Function to display the download links
+function displayDownloadLinks(data) {
+  downloadLinksDiv.innerHTML = '';  // Clear previous links
+
+  // Display Video Details
+  const title = document.createElement('h2');
+  title.textContent = data.title;
+  downloadLinksDiv.appendChild(title);
+
+  const coverImage = document.createElement('img');
+  coverImage.src = data.cover;
+  coverImage.alt = "Video Cover Image";
+  downloadLinksDiv.appendChild(coverImage);
+
+  // Create download buttons for each available option
+  const buttons = [
+    { label: 'Download Watermarked Video', url: data.result.wmVideo },
+    { label: 'Download HD Video', url: data.result.hdVideo },
+    { label: 'Download Sound', url: data.result.sound }
+  ];
+
+  buttons.forEach(button => {
+    const btn = document.createElement('button');
+    btn.textContent = button.label;
+    btn.onclick = () => {
+      window.location.href = button.url;  // Trigger the download
+    };
+    downloadLinksDiv.appendChild(btn);
+  });
+}
