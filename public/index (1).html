@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sarkar-Bandaheali TikTok Video Downloader</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Sarkar-Bandaheali</h1>
+      <p>The Ultimate TikTok Video Downloader</p>
+    </header>
+    <main>
+      <input type="text" id="videoUrl" placeholder="Paste TikTok Video URL Here" />
+      <button id="fetchBtn">Fetch Video</button>
+      <div id="videoDetails" class="hidden">
+        <div class="video-info">
+          <img id="coverImage" alt="Video Cover" />
+          <div>
+            <h2 id="videoTitle"></h2>
+            <p id="authorName"></p>
+            <p id="stats"></p>
+          </div>
+        </div>
+        <div id="downloadButtons" class="buttons"></div>
+      </div>
+    </main>
+    <footer>
+      <p>POWERED BY BANDAHEALI</p>
+    </footer>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
