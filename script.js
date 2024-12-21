@@ -1,27 +1,62 @@
-document.getElementById('fetchForm').addEventListener('submit', async function (event) {
-  event.preventDefault();
+document.getElementById('fetchBtn').addEventListener('click', async () => {
+  const videoUrl = document.getElementById('videoUrl').value;
+  const videoDetailsContainer = document.getElementById('videoDetails');
+  const downloadButtonsContainer = document.getElementById('downloadButtons');
 
-  const url = document.getElementById('tiktokUrl').value;
-  if (!url) return alert('Please enter a valid TikTok video URL');
+  if (!videoUrl.trim()) {
+    alert('Please paste a valid TikTok video URL!');
+    return;
+  }
 
   try {
-    const response = await fetch(`/api/tiktok?url=${encodeURIComponent(url)}`);
+    // Fetch video details from the API
+    const response = await fetch(`https://www.dark-yasiya-api.site/download/tiktok?url=${videoUrl}`);
     const data = await response.json();
 
-    if (data.status) {
-      document.getElementById('videoDetails').style.display = 'block';
-      document.getElementById('title').textContent = `Title: ${data.title}`;
-      document.getElementById('author').textContent = `Author: ${data.author}`;
-      document.getElementById('videoCover').src = data.cover;
-
-      document.getElementById('downloadWmVideo').onclick = () => window.location.href = data.wmVideo;
-      document.getElementById('downloadHdVideo').onclick = () => window.location.href = data.hdVideo;
-      document.getElementById('downloadSound').onclick = () => window.location.href = data.sound;
-    } else {
-      alert('Failed to fetch video details');
+    if (!data.status || !data.result) {
+      alert('Failed to fetch video details. Please check the URL or try again later.');
+      return;
     }
+
+    // Populate video details
+    document.getElementById('coverImage').src = data.result.cover;
+    document.getElementById('videoTitle').innerText = `Title: ${data.result.title}`;
+    document.getElementById('authorName').innerText = `Author: ${data.result.author}`;
+    document.getElementById('stats').innerText = `Duration: ${data.result.duration}s | Views: ${data.result.views}`;
+
+    // Generate download buttons
+    downloadButtonsContainer.innerHTML = ''; // Clear previous buttons
+
+    // Button for HD Video Download
+    const hdButton = document.createElement('button');
+    hdButton.innerText = 'Download HD Video';
+    hdButton.addEventListener('click', () => downloadFile(data.result.hdVideo, 'hd_video.mp4'));
+    downloadButtonsContainer.appendChild(hdButton);
+
+    // Button for Watermarked Video Download
+    const wmButton = document.createElement('button');
+    wmButton.innerText = 'Download Watermarked Video';
+    wmButton.addEventListener('click', () => downloadFile(data.result.wmVideo, 'wm_video.mp4'));
+    downloadButtonsContainer.appendChild(wmButton);
+
+    // Button for Audio Download
+    const audioButton = document.createElement('button');
+    audioButton.innerText = 'Download Audio';
+    audioButton.addEventListener('click', () => downloadFile(data.result.sound, 'audio.mp3'));
+    downloadButtonsContainer.appendChild(audioButton);
+
+    // Show video details
+    videoDetailsContainer.classList.remove('hidden');
   } catch (error) {
-    alert('An error occurred, please try again later');
-    console.error(error);
+    console.error('Error fetching video details:', error);
+    alert('An error occurred. Please try again later.');
   }
 });
+
+// Function to trigger file download
+function downloadFile(url, filename) {
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+}
