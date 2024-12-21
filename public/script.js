@@ -1,5 +1,7 @@
-document.getElementById('fetchBtn').addEventListener('click', async function () {
-  const url = document.getElementById('videoUrl').value;
+document.getElementById('fetchForm').addEventListener('submit', async function (event) {
+  event.preventDefault();
+
+  const url = document.getElementById('tiktokUrl').value;
   if (!url) return alert('Please enter a valid TikTok video URL');
 
   try {
@@ -8,9 +10,9 @@ document.getElementById('fetchBtn').addEventListener('click', async function () 
 
     if (data.status) {
       document.getElementById('videoDetails').style.display = 'block';
-      document.getElementById('videoTitle').textContent = `Title: ${data.title}`;
-      document.getElementById('authorName').textContent = `Author: ${data.author}`;
-      document.getElementById('coverImage').src = data.cover;
+      document.getElementById('title').textContent = `Title: ${data.title}`;
+      document.getElementById('author').textContent = `Author: ${data.author}`;
+      document.getElementById('videoCover').src = data.cover;
 
       document.getElementById('downloadWmVideo').onclick = () => window.location.href = data.wmVideo;
       document.getElementById('downloadHdVideo').onclick = () => window.location.href = data.hdVideo;
