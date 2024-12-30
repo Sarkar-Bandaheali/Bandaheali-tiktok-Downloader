@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Checker by Bandaheali</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Weather Checker by Bandaheali</h1>
+    <div class="search-box">
+      <input type="text" id="locationInput" placeholder="Enter location (e.g., Sindh)">
+      <button id="searchButton">Check Weather</button>
+    </div>
+    <div id="weatherResult" class="result hidden">
+      <h2 id="locationName"></h2>
+      <p id="weatherMain"></p>
+      <p id="weatherDescription"></p>
+      <img id="weatherIcon" alt="Weather Icon">
+      <div class="temperature">
+        <p>Temperature: <span id="temp"></span>°C</p>
+        <p>Feels Like: <span id="feelsLike"></span>°C</p>
+      </div>
+      <div class="other-details">
+        <p>Humidity: <span id="humidity"></span>%</p>
+        <p>Wind Speed: <span id="windSpeed"></span> m/s</p>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+
+//style.css
+
+
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #6dd5fa, #2980b9);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  text-align: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 15px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+  margin-bottom: 20px;
+  font-size: 2.5rem;
+  color: #fff;
+}
+
+.search-box {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+input {
+  padding: 10px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  margin-right: 10px;
+  outline: none;
+}
+
+button {
+  padding: 10px 15px;
+  font-size: 1rem;
+  background: #2980b9;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #1a5276;
+}
+
+.result.hidden {
+  display: none;
+}
+
+.result {
+  text-align: left;
+  margin-top: 20px;
+}
+
+.temperature, .other-details {
+  margin-top: 10px;
+  font-size: 1.2rem;
+}
+
+
+
+
+//script.js
+
+document.getElementById('searchButton').addEventListener('click', async () => {
+  const location = document.getElementById('locationInput').value;
+  if (!location) {
+    alert('Please enter a location.');
+    return;
+  }
+
+  const apiUrl = `https://api.giftedtech.my.id/api/search/weather?apikey=gifted&location=${location}`;
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (data.success) {
+      const { location, weather, main, wind } = data.result;
+
+      document.getElementById('locationName').textContent = location;
+      document.getElementById('weatherMain').textContent = weather.main;
+      document.getElementById('weatherDescription').textContent = weather.description;
+      document.getElementById('weatherIcon').src = `https://openweathermap.org/img/wn/${weather.icon}.png`;
+      document.getElementById('temp').textContent = main.temp;
+      document.getElementById('feelsLike').textContent = main.feels_like;
+      document.getElementById('humidity').textContent = main.humidity;
+      document.getElementById('windSpeed').textContent = wind.speed;
+
+      document.getElementById('weatherResult').classList.remove('hidden');
+    } else {
+      alert('Weather data not found. Please try a different location.');
+    }
+  } catch (error) {
+    console.error('Error fetching weather data:', error);
+    alert('An error occurred while fetching weather data.');
+  }
+});
